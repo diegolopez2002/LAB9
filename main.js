@@ -1,3 +1,4 @@
+
 var activeMapType = 'nodes_links';
 var vertices = d3.map();
 var map = d3.select('#map');
@@ -7,8 +8,6 @@ var mapHeight = +map.attr('height');
 var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
 
-var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
-var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
 
 d3.selectAll('.btn-group > .btn.btn-secondary')
     .on('click', function() {
@@ -53,6 +52,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 var svgLayer = L.svg();
 svgLayer.addTo(myMap)
 
+var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
+var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
+
 var svg = d3.select('#map').select('svg');
 var nodeLinkG = svg.select('g')
     .attr('class', 'leaflet-zoom-hide');
@@ -86,22 +88,24 @@ Promise.all([
     });
     
 function readyToDraw(nodes, links) {
-        nodeLinkG.selectAll('.grid-link')
-            .data(links)
-            .data(nodes)
-            .enter().append('line')
-            .attr('class', 'grid-link')
-            .style('stroke', '#999')
-            .style('stroke-opacity', 0.5)
-            .attr('r', function(d) {
-                return radiusScale(d.linkCount);
-            })  
-            .style('fill', function(d){
-                return colorScale(d['type']);
-            });   
-            myMap.on('zoomend', updateLayers);
-            updateLayers();
+    nodeLinkG.selectAll('.grid-link')
+    .data(links)
+    .enter().append('line')
+    .attr('class', 'grid-link')
+    .style('stroke', '#999')
+    .style('stroke-opacity', 0.5);
 
+    nodeLinkG.selectAll('.grid-node')
+        .data(nodes)
+        .enter().append('circle')
+        .attr('class', 'grid-node')
+        .style('fill', 'red')
+        .style('fill', function(d){
+          return colorScale(d['type']);     })
+        .attr('r', function(d) {
+            return radiusScale(d.linkCount);
+        });
+            
 }
 
 function updateLayers(){
@@ -115,5 +119,7 @@ function updateLayers(){
     .attr('y2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).y});
 
 };
+    
+
     
 
