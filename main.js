@@ -9,37 +9,6 @@ var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
 
 
-d3.selectAll('.btn-group > .btn.btn-secondary')
-    .on('click', function() {
-        var newMapType = d3.select(this).attr('data-type');
-
-        d3.selectAll('.btn.btn-secondary.active').classed('active', false);
-
-        cleanUpMap(activeMapType);
-        showOnMap(newMapType);
-
-        activeMapType = newMapType;
-});
-
-function cleanUpMap(type) {
-    switch(type) {
-        case 'cleared':
-            break;
-        case 'nodes_links':
-            nodeLinkG.attr('visibility', 'hidden');
-            break;
-    }
-}
-
-function showOnMap(type) {
-    switch(type) {
-        case 'cleared':
-            break;
-        case 'nodes_links':
-            nodeLinkG.attr('visibility', 'visible');
-            break;
-    }
-}
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 	     {
@@ -119,7 +88,37 @@ function updateLayers(){
     .attr('y2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).y});
 
 };
-    
 
+d3.selectAll('.btn-group > .btn.btn-secondary')
+    .on('click', function() {
+        var newMapType = d3.select(this).attr('data-type');
+
+        d3.selectAll('.btn.btn-secondary.active').classed('active', false);
+
+        cleanUpMap(activeMapType);
+        showOnMap(newMapType);
+
+        activeMapType = newMapType;
+});
+
+function cleanUpMap(type) {
+    switch(type) {
+        case 'cleared':
+            break;
+        case 'nodes_links':
+            nodeLinkG.attr('visibility', 'hidden');
+            break;
+    }
+}
+
+function showOnMap(type) {
+    switch(type) {
+        case 'cleared':
+            break;
+        case 'nodes_links':
+            nodeLinkG.attr('visibility', 'visible');
+            break;
+    }
+}
     
 
