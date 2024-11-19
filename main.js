@@ -76,6 +76,37 @@ function updateLayers(){
        .attr('x2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).x})
        .attr('y2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).y});
 
-    
 };
+
+d3.selectAll('.btn-group > .btn.btn-secondary')
+    .on('click', function() {
+        var newMapType = d3.select(this).attr('data-type');
+
+        d3.selectAll('.btn.btn-secondary.active').classed('active', false);
+
+        cleanUpMap(activeMapType);
+        showOnMap(newMapType);
+
+        activeMapType = newMapType;
+    });
+    function cleanUpMap(type) {
+        switch(type) {
+            case 'cleared':
+                break;
+            case 'nodes_links':
+                nodeLinkG.attr('visibility', 'hidden');
+                break;
+        }
+    }
     
+    function showOnMap(type) {
+        switch(type) {
+            case 'cleared':
+                break;
+            case 'nodes_links':
+                nodeLinkG.attr('visibility', 'visible');
+                break;
+        }
+    }
+    
+     
