@@ -39,14 +39,15 @@ Promise.all([
             link.node2.linkCount += 1;
 
        return link;
-    })     
+    }),
+    d3.json('states.json')     
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
-        readyToDraw(nodes, links)
+        readyToDraw(nodes, links, states)
     });
 
-function readyToDraw(nodes, links) {
+function readyToDraw(nodes, links, states) {
     var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
     var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
@@ -71,8 +72,12 @@ function readyToDraw(nodes, links) {
             .attr('class', 'grid-link')
             .style('stroke', '#999')
             .style('stroke-opacity', 0.5);
+
+
         
         myMap.on('zoomend', updateLayers);
+        statesLayer = L.geoJson(states)
+        statesLayer.addTo(myMap);
         updateLayers();
 
 }
