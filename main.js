@@ -16,7 +16,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var svgLayer = L.svg();
 svgLayer.addTo(myMap);
 
-var svg = d3.select(svgLayer._rootGroup); // Attach to Leaflet's managed SVG
+var svg = d3.select(svgLayer._rootGroup); 
 var nodeLinkG = svg.append('g').attr('class', 'leaflet-zoom-hide');
 
 
@@ -48,8 +48,8 @@ Promise.all([
         };
         link.node1 = vertices.get(link.v_id_1);
         link.node2 = vertices.get(link.v_id_2);
-        if (link.node1) link.node1.linkCount += 1;
-        if (link.node2) link.node2.linkCount += 1;
+        link.node1.linkCount += 1;
+        link.node2.linkCount += 1;
         return link;
     }),
     d3.json('states.json')
@@ -71,7 +71,9 @@ function readyToDraw(nodes, links, states) {
         .attr('class', 'grid-node')
         .style('fill', function (d) { return colorScale(d['type']); })
         .style('fill-opacity', 0.6)
-        .attr('r', function (d) { return radiusScale(d.linkCount); });
+        .attr('r', function(d) {
+            return radiusScale(d.linkCount);
+    });   
     nodeLinkG.selectAll('.grid-link')
         .data(links)
         .enter().append('line')
@@ -81,8 +83,10 @@ function readyToDraw(nodes, links, states) {
 
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values');
-        statesLayer = L.geoJson(chorostates, {style: statesStyle});
+
+        statesLayer = L.geoJson(chorostates, {style: statesStyle})
         statesLayer.addTo(myMap);
+
         myMap.on('zoomend', updateLayers);
         updateLayers();
 }
@@ -133,4 +137,3 @@ function showOnMap(type) {
                 
     }
 }
-
