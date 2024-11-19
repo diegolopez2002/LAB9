@@ -5,6 +5,7 @@ var mapHeight = +map.attr('height');
 var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
 var activeMapType = 'nodes_links';
+var nodeFeatures = [];
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 	     {
@@ -27,6 +28,7 @@ Promise.all([
            voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
        vertices.set(node.v_id, node);
        node.linkCount = 0;
+       nodeFeatures.push(turf.point([+row['lng'], +row['lat']], node));
        return node;
         }),
         d3.csv('gridkit_north_america-highvoltage-links.csv', function(row) {
@@ -37,36 +39,42 @@ Promise.all([
             link.node2 = vertices.get(link.v_id_2);
             link.node1.linkCount += 1;
             link.node2.linkCount += 1;
-
-       return link;
-    }),
-    d3.json('states.json')     
+            return link;
+    }), 
+    d3.json('states.json') 
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
         readyToDraw(nodes, links, states)
     });
 
-function readyToDraw(nodes, links, states) {
-
-    var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
-    var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
-    var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
-    var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
-
-
+function readyToDraw(nodes, links) {
+        // Determine the extent of link counts for scaling node radii
+        var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
+        var radiusScale = d3.scaleSqrt().range([0.5, 7.5]).domain(linkCountExtent);
+    
+        // Create a color scale based on node types
+        var nodeTypes = d3.map(nodes, function(d) { return d.type; }).keys();
+        var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
+        var nodeCollection = turf.featureCollection(nodeFeatures);
+        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
+        statesLayer = L.geoJson(chorostates);
+        statesLayer.addTo(myMap);
+    
+        // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
             .enter().append('circle')
             .attr('class', 'grid-node')
-            .style('fill', function(d){
+            .style('fill', function(d) {
                 return colorScale(d['type']);
-            })  
+            })
             .style('fill-opacity', 0.6)
             .attr('r', function(d) {
-                           return radiusScale(d.linkCount);
-                      });
-                
+                return radiusScale(d.linkCount); // Use radiusScale to set the radius
+            });
+    
+        // Draw the links
         nodeLinkG.selectAll('.grid-link')
             .data(links)
             .enter().append('line')
@@ -74,12 +82,13 @@ function readyToDraw(nodes, links, states) {
             .style('stroke', '#999')
             .style('stroke-opacity', 0.5);
 
-
-        
+            
+    
+        // Update layers on zoom
         myMap.on('zoomend', updateLayers);
         updateLayers();
+    }
 
-}
 
 function updateLayers(){
     nodeLinkG.selectAll('.grid-node')
