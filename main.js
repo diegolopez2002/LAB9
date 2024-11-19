@@ -39,15 +39,14 @@ Promise.all([
             link.node1.linkCount += 1;
             link.node2.linkCount += 1;
             return link;
-    }),
-    d3.json('states.json')
+    })
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
-        readyToDraw(nodes, links, states)
+        readyToDraw(nodes, links)
     });
 
-function readyToDraw(nodes, links, states) {
+function readyToDraw(nodes, links) {
 
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
@@ -59,20 +58,6 @@ function readyToDraw(nodes, links, states) {
         var choroScale = d3.scaleThreshold()
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
-
-
-        L.geoJSON(states, {
-            style: function(feature) {
-                return {
-                    color: '#2c3e50',
-                    weight: 1,
-                    fillOpacity: 0.2
-                };
-            },
-            onEachFeature: function(feature, layer) {
-                layer.bindPopup(`<strong>${feature.properties.name}</strong>`); // Assuming the state name is in `feature.properties.name`
-            }
-        }).addTo(myMap);
     
         // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
