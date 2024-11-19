@@ -39,10 +39,12 @@ function readyToDraw(nodes, links) {
             .data(nodes)
             .enter().append('circle')
             .attr('class', 'grid-node')
-            .style('fill', 'red')
+            .style('fill', function(d){
+                return colorScale(d['type']);
+            })  
             .style('fill-opacity', 0.6)
             .attr('r', 2);
-
+        
         nodeLinkG.selectAll('.grid-link')
             .data(links)
             .enter().append('line')
