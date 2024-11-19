@@ -50,16 +50,7 @@ Promise.all([
 
 function readyToDraw(nodes, links) {
 
-    var statesStyle = function(f) {
-        return {
-            weight: 2,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            fillOpacity: 0.7,
-            fillColor: 'orange'
-        }
-    };
+
     
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
@@ -71,7 +62,20 @@ function readyToDraw(nodes, links) {
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         var statesLayer = L.geoJson(chorostates, {style: statesStyle});
-        statesLayer.addTo(myMap);
+        var choroScale = d3.scaleThreshold()
+        .domain([10,20,50,100,200,500,1000])
+	    .range(d3.schemeYlOrRd[8]);
+
+        var statesStyle = function(f) {
+            return {
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                fillColor: choroScale(f.properties.values.length)
+            }
+        };
     
         // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
@@ -135,6 +139,10 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'hidden');
                         break;
+                    case 'states':
+                        myMap.removeLayer(statesLayer);
+                        break;
+                            
                 }
             }
             
@@ -145,6 +153,10 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'visible');
                         break;
+                    case 'states':
+                        statesLayer.addTo(myMap);
+                        break;
+                            
                 }
             }
             
@@ -167,6 +179,12 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
 
              
+
+
+
+
+
+
 
 
 
