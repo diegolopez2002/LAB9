@@ -65,7 +65,6 @@ function readyToDraw(nodes, links, states) {
     var radiusScale = d3.scaleSqrt()
         .domain(d3.extent(nodes, d => d.linkCount))
         .range([2, 10]);
-
     nodeLinkG.selectAll('.grid-node')
         .data(nodes)
         .enter().append('circle')
@@ -73,7 +72,6 @@ function readyToDraw(nodes, links, states) {
         .style('fill', function (d) { return colorScale(d['type']); })
         .style('fill-opacity', 0.6)
         .attr('r', function (d) { return radiusScale(d.linkCount); });
-
     nodeLinkG.selectAll('.grid-link')
         .data(links)
         .enter().append('line')
@@ -82,13 +80,11 @@ function readyToDraw(nodes, links, states) {
         .style('stroke-opacity', 0.5);
 
         var nodeCollection = turf.featureCollection(nodeFeatures);
-        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
+        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values');
         statesLayer = L.geoJson(chorostates, {style: statesStyle});
         statesLayer.addTo(myMap);
-        
-    
-    myMap.on('zoomend', updateLayers);
-    updateLayers();
+        myMap.on('zoomend', updateLayers);
+        updateLayers();
 }
 
 function updateLayers() {
@@ -112,7 +108,6 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
         cleanUpMap(activeMapType);
         showOnMap(newMapType);
-
         activeMapType = newMapType;
     });
 
@@ -121,7 +116,6 @@ function cleanUpMap(type) {
         case 'nodes_links':
             nodeLinkG.style('display', 'none');
             break;
-
         case 'states':
             myMap.removeLayer(statesLayer);
             break;           
@@ -139,3 +133,4 @@ function showOnMap(type) {
                 
     }
 }
+
