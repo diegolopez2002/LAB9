@@ -40,8 +40,7 @@ Promise.all([
             link.node1.linkCount += 1;
             link.node2.linkCount += 1;
             return link;
-    }), 
-    d3.json('states.json') 
+    })
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
@@ -74,8 +73,6 @@ function readyToDraw(nodes, links) {
                 fillColor: choroScale(f.properties.values.length)
             }
         };
-
-        statesLayer.addTo(myMap);
 
     
         // Draw the nodes
@@ -161,44 +158,6 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                 }
             }
             
-
-
-             
-
-
-
-
-             
-
-
-
-
-
-
-
-
-
-
-             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
