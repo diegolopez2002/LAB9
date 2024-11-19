@@ -1,17 +1,8 @@
 var map = d3.select('#map');
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
-
 var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-	     {
-	       maxZoom: 10,
-	       minZoom: 3,
-	       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
-             }).addTo(myMap);
-
 
 var svgLayer = L.svg();
 svgLayer.addTo(myMap)
@@ -29,7 +20,7 @@ Promise.all([
         var nodes = data[0];
         readyToDraw(nodes)
     });
-    
+
 function readyToDraw(nodes) {
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
@@ -49,3 +40,20 @@ function updateLayers(){
     .attr('cx', function(d){return myMap.latLngToLayerPoint(d.LatLng).x})
     .attr('cy', function(d){return myMap.latLngToLayerPoint(d.LatLng).y})
 };
+    
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+	     {
+	       maxZoom: 10,
+	       minZoom: 3,
+	       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+             }).addTo(myMap);
+
+
+
+
+
+
+             
+
+
