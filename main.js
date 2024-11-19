@@ -49,9 +49,6 @@ Promise.all([
 
 function readyToDraw(nodes, links, states) {
 
-    statesLayer = L.geoJson(states)
-    statesLayer.addTo(myMap);
-
     var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
     var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
