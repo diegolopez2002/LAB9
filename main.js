@@ -49,6 +49,9 @@ Promise.all([
 function readyToDraw(nodes, links) {
     var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
+    var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
+    var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
+
 
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
@@ -58,8 +61,10 @@ function readyToDraw(nodes, links) {
                 return colorScale(d['type']);
             })  
             .style('fill-opacity', 0.6)
-            .attr('r', 2);
-        
+            .attr('r', function(d) {
+                           return radiusScale(d.linkCount);
+                      });
+                
         nodeLinkG.selectAll('.grid-link')
             .data(links)
             .enter().append('line')
@@ -126,5 +131,7 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
 
              
+
+
 
 
