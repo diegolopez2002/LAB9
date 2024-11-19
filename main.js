@@ -1,4 +1,5 @@
 var map = d3.select('#map');
+var nodeFeatures = [];
 var vertices = d3.map();
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
@@ -18,6 +19,18 @@ svgLayer.addTo(myMap);
 var svg = d3.select(svgLayer._rootGroup); // Attach to Leaflet's managed SVG
 var nodeLinkG = svg.append('g').attr('class', 'leaflet-zoom-hide');
 
+var statesStyle = function(f) {
+    return {
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7,
+        fillColor: choroScale(f.properties.values.length)
+    }
+};
+
+
 Promise.all([
     d3.csv('gridkit_north_america-highvoltage-vertices.csv', function (row) {
         var node = { 
@@ -30,6 +43,7 @@ Promise.all([
         };
         vertices.set(node.v_id, node);
         node.linkCount = 0;
+        nodeFeatures.push(turf.point([+row['lng'], +row['lat']], node));
         return node;
     }),
     d3.csv('gridkit_north_america-highvoltage-links.csv', function (row) {
@@ -48,14 +62,15 @@ Promise.all([
         if (link.node1) link.node1.linkCount += 1;
         if (link.node2) link.node2.linkCount += 1;
         return link;
-    })
+    }),
+    d3.json('states.json')
 ]).then(function (data) {
     var nodes = data[0];
     var links = data[1];
-    readyToDraw(nodes, links);
+    readyToDraw(nodes, links, states);
 });
 
-function readyToDraw(nodes, links) {
+function readyToDraw(nodes, links, states) {
     var nodeTypes = d3.map(nodes, function (d) { return d.type; }).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
     var radiusScale = d3.scaleSqrt()
@@ -76,6 +91,13 @@ function readyToDraw(nodes, links) {
         .attr('class', 'grid-link')
         .style('stroke', '#999')
         .style('stroke-opacity', 0.5);
+
+        var nodeCollection = turf.featureCollection(nodeFeatures);
+        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
+        statesLayer = L.geoJson(chorostates, {style: statesStyle});
+        statesLayer.addTo(myMap);
+        
+        
 
     myMap.on('zoomend', updateLayers);
     updateLayers();
@@ -111,6 +133,10 @@ function cleanUpMap(type) {
         case 'nodes_links':
             nodeLinkG.style('display', 'none');
             break;
+
+        case 'states':
+            myMap.removeLayer(statesLayer);
+            break;           
     }
 }
 
@@ -119,6 +145,10 @@ function showOnMap(type) {
         case 'nodes_links':
             nodeLinkG.style('display', null);
             break;
+        case 'states':
+            statesLayer.addTo(myMap);
+            break;
+                
     }
 }
 
