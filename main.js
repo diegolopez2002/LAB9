@@ -35,6 +35,8 @@ Promise.all([
     });
 
 function readyToDraw(nodes, links) {
+    var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
+    var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
             .enter().append('circle')
@@ -114,6 +116,8 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
 
              
+
+  
 
 
 
