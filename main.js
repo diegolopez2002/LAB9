@@ -19,17 +19,6 @@ svgLayer.addTo(myMap);
 var svg = d3.select(svgLayer._rootGroup); // Attach to Leaflet's managed SVG
 var nodeLinkG = svg.append('g').attr('class', 'leaflet-zoom-hide');
 
-var statesStyle = function(f) {
-    return {
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.7,
-        fillColor: choroScale(f.properties.values.length)
-    }
-};
-
 
 Promise.all([
     d3.csv('gridkit_north_america-highvoltage-vertices.csv', function (row) {
@@ -97,8 +86,7 @@ function readyToDraw(nodes, links, states) {
         statesLayer = L.geoJson(chorostates, {style: statesStyle});
         statesLayer.addTo(myMap);
         
-        
-
+    
     myMap.on('zoomend', updateLayers);
     updateLayers();
 }
@@ -151,4 +139,3 @@ function showOnMap(type) {
                 
     }
 }
-
