@@ -6,6 +6,14 @@ var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
 var activeMapType = 'nodes_links';
 
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+	     {
+	       maxZoom: 10,
+	       minZoom: 3,
+	       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+             }).addTo(myMap);
+
+
 var svgLayer = L.svg();
 svgLayer.addTo(myMap)
 
@@ -18,6 +26,7 @@ Promise.all([
             var node = {v_id: +row['v_id'], LatLng: [+row['lat'], +row['lng']], type: row['type'],
            voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
        vertices.set(node.v_id, node);
+       node.linkCount = 0;
        return node;
         }),
         d3.csv('gridkit_north_america-highvoltage-links.csv', function(row) {
@@ -26,6 +35,9 @@ Promise.all([
             frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
             link.node1 = vertices.get(link.v_id_1);
             link.node2 = vertices.get(link.v_id_2);
+            link.node1.linkCount += 1;
+            link.node2.linkCount += 1;
+
        return link;
     })     
     ]).then(function(data) {
@@ -37,6 +49,7 @@ Promise.all([
 function readyToDraw(nodes, links) {
     var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
+
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
             .enter().append('circle')
@@ -73,14 +86,6 @@ function updateLayers(){
 };
     
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-	     {
-	       maxZoom: 10,
-	       minZoom: 3,
-	       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
-             }).addTo(myMap);
-
-
 d3.selectAll('.btn-group > .btn.btn-secondary')
              .on('click', function() {
                  var newMapType = d3.select(this).attr('data-type');
@@ -116,8 +121,6 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
 
              
-
-  
 
 
 
