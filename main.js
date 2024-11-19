@@ -49,6 +49,18 @@ Promise.all([
     });
 
 function readyToDraw(nodes, links) {
+
+    var statesStyle = function(f) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: 'orange'
+        }
+    };
+    
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
         var radiusScale = d3.scaleSqrt().range([0.5, 7.5]).domain(linkCountExtent);
@@ -58,7 +70,7 @@ function readyToDraw(nodes, links) {
         var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
-        statesLayer = L.geoJson(chorostates);
+        var statesLayer = L.geoJson(chorostates, {style: statesStyle});
         statesLayer.addTo(myMap);
     
         // Draw the nodes
@@ -155,6 +167,14 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
 
 
              
+
+
+
+
+
+
+
+
 
 
 
