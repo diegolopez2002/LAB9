@@ -5,6 +5,8 @@ var map = d3.select('#map');
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
 
+
+
 // Leaflet map setup
 var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
@@ -76,23 +78,23 @@ function readyToDraw(nodes, links, states) {
         updateLayers();
         var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
         var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
-    
+        var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
+        var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         var bbox = turf.bbox(nodeCollection);
         var cellSize = 250;
         var options = {units: 'kilometers'};
-
         var triangleGrid = turf.triangleGrid(bbox, cellSize, options);
         var triangleBins = turf.collect(triangleGrid, nodeCollection, 'v_id', 'values');
         triangleBins.features = triangleBins.features.filter(function(d){
         return d.properties.values.length > 0;
     });
 
-        triangleLayer = L.geoJson(triangleBins, {style: triangleStyle});
+        var triangleLayer = L.geoJson(triangleBins, {style: triangleStyle});
         triangleLayer.addTo(myMap);
 
-        triangleExtent = d3.extent(triangleBins.features, function(d){
+        var triangleExtent = d3.extent(triangleBins.features, function(d){
             return d.properties.values.length;
         });
         var triangleScale = d3.scaleSequential(d3.interpolateMagma)
@@ -130,8 +132,6 @@ function readyToDraw(nodes, links, states) {
 
 }
 
-var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
-var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
 
 function updateLayers(){
     nodeLinkG.selectAll('.grid-node')
@@ -189,6 +189,7 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     
         }
     }
+    
     
     
     
