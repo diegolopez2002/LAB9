@@ -1,3 +1,4 @@
+var nodeFeatures = [];
 var vertices = d3.map();
 var activeMapType = 'nodes_links';
 var map = d3.select('#map');
@@ -23,12 +24,14 @@ var svg = d3.select('#map').select('svg');
 var nodeLinkG = svg.select('g')
 .attr('class', 'leaflet-zoom-hide');
 
+
 Promise.all([
     d3.csv('gridkit_north_america-highvoltage-vertices.csv', function(row) {
         var node = {v_id: +row['v_id'], LatLng: [+row['lat'], +row['lng']], type: row['type'],
           voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
           vertices.set(node.v_id, node);
           node.linkCount = 0;
+          nodeFeatures.push(turf.point([+row['lng'], +row['lat']], node));
           return node;
 
     }),
@@ -42,19 +45,15 @@ Promise.all([
                link.node2.linkCount += 1;
                return link
         
-    })
-        
+    }),
+    d3.json('states.json')     
 ]).then(function(data) {
     var nodes = data[0];
     var links = data[1];
-    readyToDraw(nodes, links)
+    readyToDraw(nodes, links, states)
 });
 
-var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
-var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
-
-
-function readyToDraw(nodes, links) {
+function readyToDraw(nodes, links, states) {
     nodeLinkG.selectAll('.grid-link')
     .data(links)
     .enter().append('line')
@@ -76,6 +75,58 @@ function readyToDraw(nodes, links) {
         updateLayers();
         var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
         var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
+        var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
+        var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
+        var nodeCollection = turf.featureCollection(nodeFeatures);
+        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
+        var bbox = turf.bbox(nodeCollection);
+        var cellSize = 250;
+        var options = {units: 'kilometers'};
+
+        var triangleGrid = turf.triangleGrid(bbox, cellSize, options);
+        var triangleBins = turf.collect(triangleGrid, nodeCollection, 'v_id', 'values');
+        triangleBins.features = triangleBins.features.filter(function(d){
+        return d.properties.values.length > 0;
+    });
+
+        triangleLayer = L.geoJson(triangleBins, {style: triangleStyle});
+        triangleLayer.addTo(myMap);
+
+        triangleExtent = d3.extent(triangleBins.features, function(d){
+            return d.properties.values.length;
+        });
+        var triangleScale = d3.scaleSequential(d3.interpolateMagma)
+            .domain(triangleExtent.reverse());
+        
+        var triangleStyle = function(f) {
+                return {
+                    weight: 0.5,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7,
+                    fillColor: triangleScale(f.properties.values.length)
+                }
+            };
+        
+
+        var statesStyle = function(f) {
+            return {
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                fillColor: choroScale(f.properties.values.length)
+            }
+        };
+
+        
+        statesLayer = L.geoJson(chorostates, {style: statesStyle});
+        var choroScale = d3.scaleThreshold()
+	.domain([10,20,50,100,200,500,1000])
+	.range(d3.schemeYlOrRd[8]);
+
+
 
 }
 
@@ -109,6 +160,13 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
             case 'nodes_links':
                 nodeLinkG.attr('visibility', 'hidden');
                 break;
+            case 'states':
+                myMap.removeLayer(statesLayer);
+                break;
+            case 'triangle_bins':
+               myMap.removeLayer(triangleLayer);
+               break;
+
         }
     }
     
@@ -119,6 +177,14 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
             case 'nodes_links':
                 nodeLinkG.attr('visibility', 'visible');
                 break;
+            case 'states':
+                statesLayer.addTo(myMap);
+                break;
+            case 'triangle_bins':
+                    triangleLayer.addTo(myMap);
+                    break;
+                    
+                    
         }
     }
     
