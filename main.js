@@ -53,6 +53,7 @@ Promise.all([
     readyToDraw(nodes, links, states)
 });
 
+
 function readyToDraw(nodes, links, states) {
     nodeLinkG.selectAll('.grid-link')
     .data(links)
@@ -75,8 +76,7 @@ function readyToDraw(nodes, links, states) {
         updateLayers();
         var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
         var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
-        var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
-        var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
+    
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         var bbox = turf.bbox(nodeCollection);
@@ -130,6 +130,9 @@ function readyToDraw(nodes, links, states) {
 
 }
 
+var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
+var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
+
 function updateLayers(){
     nodeLinkG.selectAll('.grid-node')
     .attr('cx', function(d){return myMap.latLngToLayerPoint(d.LatLng).x})
@@ -139,7 +142,6 @@ function updateLayers(){
        .attr('y1', function(d){return myMap.latLngToLayerPoint(d.node1.LatLng).y})
        .attr('x2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).x})
        .attr('y2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).y});
-
 };
 
 d3.selectAll('.btn-group > .btn.btn-secondary')
@@ -187,5 +189,6 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     
         }
     }
+    
     
     
