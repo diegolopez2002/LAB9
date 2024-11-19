@@ -26,6 +26,7 @@ Promise.all([
             var node = {v_id: +row['v_id'], LatLng: [+row['lat'], +row['lng']], type: row['type'],
             voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
             vertices.set(node.v_id, node);
+            node.linkCount = 0;
             return node;
         }),
         d3.csv('gridkit_north_america-highvoltage-links.csv', function(row) {
@@ -34,6 +35,8 @@ Promise.all([
                        frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
                    link.node1 = vertices.get(link.v_id_1);
                    link.node2 = vertices.get(link.v_id_2);
+                   link.node1.linkCount += 1;
+                   link.node2.linkCount += 1;
                    return link;
             
                 })
@@ -45,13 +48,19 @@ Promise.all([
     });
     
 function readyToDraw(nodes, links) {
+    var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
+    var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
             .enter().append('circle')
             .attr('class', 'grid-node')
-            .style('fill', 'red')
+            .style('fill', function(d){
+                          return colorScale(d['type']);
+            })
             .style('fill-opacity', 0.6)
-            .attr('r', 2);
+            .attr('r', function(d) {
+                           return radiusScale(d.linkCount);
+                       });     
         nodeLinkG.selectAll('.grid-link')
             .data(links)
             .enter().append('line')
