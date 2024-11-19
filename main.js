@@ -50,7 +50,20 @@ Promise.all([
 
 function readyToDraw(nodes, links) {
 
+<<<<<<< Updated upstream
 
+=======
+    var statesStyle = function(f) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: 'orange'
+        }
+    };
+>>>>>>> Stashed changes
     
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
@@ -62,6 +75,7 @@ function readyToDraw(nodes, links) {
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         var statesLayer = L.geoJson(chorostates, {style: statesStyle});
+<<<<<<< Updated upstream
         var choroScale = d3.scaleThreshold()
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
@@ -76,6 +90,9 @@ function readyToDraw(nodes, links) {
                 fillColor: choroScale(f.properties.values.length)
             }
         };
+=======
+        statesLayer.addTo(myMap);
+>>>>>>> Stashed changes
     
         // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
