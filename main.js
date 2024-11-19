@@ -1,5 +1,5 @@
-var map = d3.select('#map');
 var nodeFeatures = [];
+var map = d3.select('#map');
 var vertices = d3.map();
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
@@ -60,6 +60,18 @@ Promise.all([
 });
 
 function readyToDraw(nodes, links, states) {
+    var statesStyle = function(f) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: choroScale(f.properties.values.length)
+        }
+    };
+    var nodeCollection = turf.featureCollection(nodeFeatures);
+    var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values');
     var nodeTypes = d3.map(nodes, function (d) { return d.type; }).keys();
     var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
     var radiusScale = d3.scaleSqrt()
@@ -81,14 +93,9 @@ function readyToDraw(nodes, links, states) {
         .style('stroke', '#999')
         .style('stroke-opacity', 0.5);
 
-        var nodeCollection = turf.featureCollection(nodeFeatures);
-        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values');
-
-        statesLayer = L.geoJson(chorostates, {style: statesStyle})
-        statesLayer.addTo(myMap);
-
-        myMap.on('zoomend', updateLayers);
-        updateLayers();
+    statesLayer = L.geoJson(chorostates, {style: statesStyle})
+    myMap.on('zoomend', updateLayers);
+    updateLayers();
 }
 
 function updateLayers() {
