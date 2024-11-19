@@ -47,7 +47,7 @@ Promise.all([
         readyToDraw(nodes, links, states)
     });
 
-function readyToDraw(nodes, links) {
+function readyToDraw(nodes, links, states) {
 
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
@@ -150,6 +150,19 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                 }
             }
             
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
