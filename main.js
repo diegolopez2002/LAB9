@@ -5,11 +5,9 @@ var map = d3.select('#map');
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
 
-
-
-// Leaflet map setup
 var atlLatLng = new L.LatLng(33.7771, -84.3900);
 var myMap = L.map('map').setView(atlLatLng, 5);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 	     {
 	       maxZoom: 10,
@@ -18,35 +16,26 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
              }).addTo(myMap);
 
              
-             
 var svgLayer = L.svg();
 svgLayer.addTo(myMap)
              
 var svg = d3.select('#map').select('svg');
 var nodeLinkG = svg.select('g')
 .attr('class', 'leaflet-zoom-hide');
+             
+
 
 
 Promise.all([
     d3.csv('gridkit_north_america-highvoltage-vertices.csv', function(row) {
-        var node = {v_id: +row['v_id'], LatLng: [+row['lat'], +row['lng']], type: row['type'],
-          voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
-          vertices.set(node.v_id, node);
-          node.linkCount = 0;
-          nodeFeatures.push(turf.point([+row['lng'], +row['lat']], node));
-          return node;
-
+        return {v_id: +row['v_id'], LatLng: [+row['lat'], +row['lng']], type: row['type'],
+                    voltage: +row['voltage'], frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
     }),
     d3.csv('gridkit_north_america-highvoltage-links.csv', function(row) {
-        var link = {l_id: +row['l_id'], v_id_1: +row['v_id_1'], v_id_2: +row['v_id_2'],
-                   voltage: +row['voltage'], cables: +row['cables'], wires: +row['wires'],
-                   frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
-               link.node1 = vertices.get(link.v_id_1);
-               link.node2 = vertices.get(link.v_id_2);
-               link.node1.linkCount += 1;
-               link.node2.linkCount += 1;
-               return link
-        
+        return {l_id: +row['l_id'], v_id_1: +row['v_id_1'], v_id_2: +row['v_id_2'],
+                  voltage: +row['voltage'], cables: +row['cables'], wires: +row['wires'],
+                  frequency: +row['frequency'], wkt_srid_4326: row['wkt_srid_4326']};
+
     }),
     d3.json('states.json')     
 ]).then(function(data) {
@@ -76,10 +65,7 @@ function readyToDraw(nodes, links, states) {
         });   
         myMap.on('zoomend', updateLayers);
         updateLayers();
-        var nodeTypes = d3.map(nodes, function(d){return d.type;}).keys();
-        var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
-        var linkCountExtent = d3.extent(nodes, function(d) {return d.linkCount;});
-        var radiusScale = d3.scaleSqrt().range([0.5,7.5]).domain(linkCountExtent);
+        
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         var bbox = turf.bbox(nodeCollection);
@@ -128,10 +114,7 @@ function readyToDraw(nodes, links, states) {
 	.domain([10,20,50,100,200,500,1000])
 	.range(d3.schemeYlOrRd[8]);
 
-
-
 }
-
 
 function updateLayers(){
     nodeLinkG.selectAll('.grid-node')
