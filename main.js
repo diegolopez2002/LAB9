@@ -44,7 +44,7 @@ Promise.all([
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
-        readyToDraw(nodes, links, states)
+        readyToDraw(nodes, links)
     });
 
 function readyToDraw(nodes, links) {
@@ -59,17 +59,6 @@ function readyToDraw(nodes, links) {
         var choroScale = d3.scaleThreshold()
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
-
-        var statesStyle = function(f) {
-            return {
-                weight: 2,
-                opacity: 1,
-                color: 'white',
-                dashArray: '3',
-                fillOpacity: 0.7,
-                fillColor: choroScale(f.properties.values.length)
-            }
-        };
 
     
         // Draw the nodes
@@ -94,7 +83,6 @@ function readyToDraw(nodes, links) {
             .style('stroke-opacity', 0.5);
 
             
-    
         // Update layers on zoom
         myMap.on('zoomend', updateLayers);
         updateLayers();
@@ -134,9 +122,6 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'hidden');
                         break;
-                    case 'states':
-                        myMap.removeLayer(statesLayer);
-                        break;
                             
                 }
             }
@@ -148,13 +133,16 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'visible');
                         break;
-                    case 'states':
-                        statesLayer.addTo(myMap);
-                        break;
                             
                 }
             }
             
+
+
+
+
+
+
 
 
 
