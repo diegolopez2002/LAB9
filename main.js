@@ -56,9 +56,6 @@ function readyToDraw(nodes, links) {
         // Create a color scale based on node types
         var nodeTypes = d3.map(nodes, function(d) { return d.type; }).keys();
         var colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(nodeTypes);
-        var nodeCollection = turf.featureCollection(nodeFeatures);
-        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
-        var statesLayer = L.geoJson(chorostates, {style: statesStyle});
         var choroScale = d3.scaleThreshold()
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
