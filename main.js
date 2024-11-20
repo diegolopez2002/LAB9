@@ -1,4 +1,4 @@
-var vertices = d3.map();
+ var vertices = d3.map();
 var map = d3.select('#map');
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
@@ -39,7 +39,8 @@ Promise.all([
             link.node1.linkCount += 1;
             link.node2.linkCount += 1;
             return link;
-    })
+    }),
+    d3.json('states.json')
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
@@ -99,7 +100,6 @@ function updateLayers(){
        .attr('y2', function(d){return myMap.latLngToLayerPoint(d.node2.LatLng).y});
 
 };
-    
 
 d3.selectAll('.btn-group > .btn.btn-secondary')
              .on('click', function() {
@@ -135,9 +135,5 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                 }
             }
             
-
-
-
-
 
 
