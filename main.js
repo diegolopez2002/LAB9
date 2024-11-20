@@ -1,4 +1,4 @@
- var vertices = d3.map();
+var vertices = d3.map();
 var map = d3.select('#map');
 var mapWidth = +map.attr('width');
 var mapHeight = +map.attr('height');
