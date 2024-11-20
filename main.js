@@ -44,10 +44,11 @@ Promise.all([
     ]).then(function(data) {
         var nodes = data[0];
         var links = data[1];
-        readyToDraw(nodes, links)
+        var states = data[2];
+        readyToDraw(nodes, links, states)
     });
 
-function readyToDraw(nodes, links) {
+function readyToDraw(nodes, links, states) {
 
         // Determine the extent of link counts for scaling node radii
         var linkCountExtent = d3.extent(nodes, function(d) { return d.linkCount; });
@@ -81,6 +82,24 @@ function readyToDraw(nodes, links) {
             .style('stroke', '#999')
             .style('stroke-opacity', 0.5);
 
+            var choroScale = d3.scaleThreshold()
+	            .domain([10,20,50,100,200,500,1000])
+	            .range(d3.schemeYlOrRd[8]);
+
+            var statesStyle = function(f) {
+                return {
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    dashArray: '3',
+                    fillOpacity: 0.7,
+                    fillColor: choroScale(f.properties.values.length)
+                }
+            };
+            
+        var nodeCollection = turf.featureCollection(nodeFeatures);
+        var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
+        statesLayer = L.geoJson(chorostates, {style: statesStyle});
             
         // Update layers on zoom
         myMap.on('zoomend', updateLayers);
@@ -120,6 +139,9 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'hidden');
                         break;
+                    case 'states':
+                        myMap.removeLayer(statesLayer);
+                        break;
                             
                 }
             }
@@ -131,9 +153,14 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'nodes_links':
                         nodeLinkG.attr('visibility', 'visible');
                         break;
-                            
+                    case 'states':
+                        statesLayer.addTo(myMap);
+                        break;
+                          
                 }
             }
             
+
+
 
 
