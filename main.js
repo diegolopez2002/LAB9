@@ -60,12 +60,6 @@ function readyToDraw(nodes, links, states) {
         var choroScale = d3.scaleThreshold()
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
-    
-        triangleExtent = d3.extent(triangleBins.features, function(d){
-            return d.properties.values.length;
-        });
-        var triangleScale = d3.scaleSequential(d3.interpolateMagma)
-            .domain(triangleExtent.reverse());
         
         // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
@@ -103,15 +97,6 @@ function readyToDraw(nodes, links, states) {
                 }
             };
 
-            var triangleStyle = function(f) {
-                return {
-                    weight: 0.5,
-                    opacity: 1,
-                    color: 'white',
-                    fillOpacity: 0.7,
-                    fillColor: triangleScale(f.properties.values.length)
-                }
-            };
         
             
         var nodeCollection = turf.featureCollection(nodeFeatures);
@@ -122,14 +107,33 @@ function readyToDraw(nodes, links, states) {
         var bbox = turf.bbox(nodeCollection);
         var cellSize = 250;
         var options = {units: 'kilometers'};
-
+        
         var triangleGrid = turf.triangleGrid(bbox, cellSize, options);
         var triangleBins = turf.collect(triangleGrid, nodeCollection, 'v_id', 'values');
         triangleBins.features = triangleBins.features.filter(function(d){
             return d.properties.values.length > 0;
         });
 
+        triangleExtent = d3.extent(triangleBins.features, function(d){
+            return d.properties.values.length;
+        });
+        var triangleScale = d3.scaleSequential(d3.interpolateMagma)
+            .domain(triangleExtent.reverse());
+        
+
+        var triangleStyle = function(f) {
+            return {
+                weight: 0.5,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.7,
+                fillColor: triangleScale(f.properties.values.length)
+            }
+        };
+
         triangleLayer = L.geoJson(triangleBins, {style: triangleStyle});
+        triangleLayer.addTo(myMap);
+        
 
             
         // Update layers on zoom
@@ -190,6 +194,7 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'states':
                         statesLayer.addTo(myMap);
                         break;
+
                     case 'triangle_bins':
                         triangleLayer.addTo(myMap);
                         break;
@@ -198,6 +203,9 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                 }
             }
             
+
+
+
 
 
 
