@@ -61,6 +61,12 @@ function readyToDraw(nodes, links, states) {
         .domain([10,20,50,100,200,500,1000])
 	    .range(d3.schemeYlOrRd[8]);
     
+        triangleExtent = d3.extent(triangleBins.features, function(d){
+            return d.properties.values.length;
+        });
+        var triangleScale = d3.scaleSequential(d3.interpolateMagma)
+            .domain(triangleExtent.reverse());
+        
         // Draw the nodes
         nodeLinkG.selectAll('.grid-node')
             .data(nodes)
@@ -96,10 +102,35 @@ function readyToDraw(nodes, links, states) {
                     fillColor: choroScale(f.properties.values.length)
                 }
             };
+
+            var triangleStyle = function(f) {
+                return {
+                    weight: 0.5,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7,
+                    fillColor: triangleScale(f.properties.values.length)
+                }
+            };
+        
             
         var nodeCollection = turf.featureCollection(nodeFeatures);
         var chorostates = turf.collect(states, nodeCollection, 'v_id', 'values')
         statesLayer = L.geoJson(chorostates, {style: statesStyle});
+
+
+        var bbox = turf.bbox(nodeCollection);
+        var cellSize = 250;
+        var options = {units: 'kilometers'};
+
+        var triangleGrid = turf.triangleGrid(bbox, cellSize, options);
+        var triangleBins = turf.collect(triangleGrid, nodeCollection, 'v_id', 'values');
+        triangleBins.features = triangleBins.features.filter(function(d){
+            return d.properties.values.length > 0;
+        });
+
+        triangleLayer = L.geoJson(triangleBins, {style: triangleStyle});
+
             
         // Update layers on zoom
         myMap.on('zoomend', updateLayers);
@@ -142,7 +173,10 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'states':
                         myMap.removeLayer(statesLayer);
                         break;
-                            
+                    case 'triangle_bins':
+                        myMap.removeLayer(triangleLayer);
+                        break;
+                                     
                 }
             }
             
@@ -156,10 +190,15 @@ d3.selectAll('.btn-group > .btn.btn-secondary')
                     case 'states':
                         statesLayer.addTo(myMap);
                         break;
+                    case 'triangle_bins':
+                        triangleLayer.addTo(myMap);
+                        break;
+                            
                           
                 }
             }
             
+
 
 
 
